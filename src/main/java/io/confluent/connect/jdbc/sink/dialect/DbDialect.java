@@ -62,6 +62,29 @@ public abstract class DbDialect {
     return builder.toString();
   }
 
+  public final String getUpdate(final String tableName, final Collection<String> keyColumns, final Collection<String> nonKeyColumns) {
+    StringBuilder builder = new StringBuilder("UPDATE ");
+    builder.append(escaped(tableName));
+    builder.append(" SET ");
+
+    Transform<String> updateTransformer = new Transform<String>() {
+      @Override public void apply(StringBuilder builder, String input) {
+        builder.append(escaped(input));
+        builder.append(" = ?");
+      }
+    };
+
+    joinToBuilder(builder, ", ", nonKeyColumns, updateTransformer);
+
+    if (!keyColumns.isEmpty()) {
+      builder.append(" WHERE ");
+    }
+
+    joinToBuilder(builder, ", ", keyColumns, updateTransformer);
+    return builder.toString();
+  }
+
+
   public String getUpsertQuery(final String table, final Collection<String> keyColumns, final Collection<String> columns) {
     throw new UnsupportedOperationException();
   }
@@ -238,6 +261,10 @@ public abstract class DbDialect {
     if (url.startsWith("jdbc:sap")) {
       // HANA url's are in the format : jdbc:sap://$host:3(instance)(port)/
       return new HanaDialect();
+    }
+
+    if (url.startsWith("jdbc:vertica")) {
+      return new VerticaDialect();
     }
 
     final String protocol = extractProtocolFromUrl(url).toLowerCase();
