@@ -31,7 +31,7 @@ import org.apache.kafka.connect.data.Time;
 import org.apache.kafka.connect.data.Timestamp;
 
 public class Db2Dialect extends DbDialect {
-  private enum Db2TableOrganization { UNKNOWN, ROW, COLUMN };
+  enum Db2TableOrganization { UNKNOWN, ROW, COLUMN };
   private Db2TableOrganization tableOrganization = Db2TableOrganization.UNKNOWN;
   
   public Db2Dialect() {
@@ -87,6 +87,14 @@ public class Db2Dialect extends DbDialect {
     tableOrganization = tableOrg;
   }
 
+  /**
+   * Set table organization directly (for unit testing).
+   * @param tableOrganization table organization
+   */
+  void setTableOrganization(Db2TableOrganization tableOrganization) {
+    this.tableOrganization = tableOrganization;
+  }
+  
   // DB2 10.5+
   private boolean supportsTableOrganization(DatabaseMetaData databaseMetaData) throws SQLException {
     String productVersion = databaseMetaData.getDatabaseProductVersion();
